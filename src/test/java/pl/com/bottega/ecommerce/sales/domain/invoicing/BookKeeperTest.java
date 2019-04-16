@@ -10,8 +10,7 @@ import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductData;
 import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductType;
 import pl.com.bottega.ecommerce.sharedkernel.Money;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class BookKeeperTest {
 
@@ -44,5 +43,18 @@ public class BookKeeperTest {
         Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
 
         Assert.assertThat(invoice.getItems().size(), Matchers.equalTo(1));
+    }
+
+    @Test public void issuanceMethodInvokesCalculateTaxTwoTimes() {
+        Money money = new Money(2, Money.DEFAULT_CURRENCY);
+
+        RequestItem requestItem1 = new RequestItem(productData, 1, money);
+        RequestItem requestItem2 = new RequestItem(productData, 1, money);
+
+        invoiceRequest.add(requestItem1);
+        invoiceRequest.add(requestItem2);
+        bookKeeper.issuance(invoiceRequest, taxPolicy);
+
+        verify(taxPolicy, times(2)).calculateTax(ProductType.DRUG, money);
     }
 }
