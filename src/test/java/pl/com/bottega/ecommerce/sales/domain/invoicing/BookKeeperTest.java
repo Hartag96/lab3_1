@@ -1,41 +1,48 @@
 package pl.com.bottega.ecommerce.sales.domain.invoicing;
 
+import org.hamcrest.Matchers;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.ClientData;
 import pl.com.bottega.ecommerce.canonicalmodel.publishedlanguage.Id;
-import pl.com.bottega.ecommerce.sales.domain.productscatalog.Product;
 import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductData;
+import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductType;
 import pl.com.bottega.ecommerce.sharedkernel.Money;
 
-import java.math.BigDecimal;
-import java.util.Date;
-
-import static org.junit.Assert.*;
-import static pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductType.DRUG;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class BookKeeperTest {
-    Id id = new Id("1");
-    ClientData cd = new ClientData(id, "foo");
-    InvoiceFactory invoiceFactory = new InvoiceFactory();
-    BookKeeper bk = new BookKeeper(invoiceFactory);
 
-    InvoiceRequest ir = new InvoiceRequest(cd);
-    TaxPolicy taxPolicy;
+    private BookKeeper bookKeeper;
+    private InvoiceRequest invoiceRequest;
+    private ProductData productData;
+    private TaxPolicy taxPolicy;
 
-    Id productId1 = new Id("11");
-    BigDecimal priceProduct1 = BigDecimal.valueOf(100);
-    Money moneyProduct1 = new Money(priceProduct1);
-    String product1Name = "product1";
-    Product productData1 = new Product(productId1, moneyProduct1, product1Name, DRUG);
-    RequestItem requestItem1 = new RequestItem(productData1.generateSnapshot(), 1, moneyProduct1);
+    @Before
+    public void initialize() {
 
+        ClientData clientData = new ClientData(Id.generate(), "foo");
+        InvoiceFactory invoiceFactory = new InvoiceFactory();
 
+        bookKeeper = new BookKeeper(invoiceFactory);
+        invoiceRequest = new InvoiceRequest(clientData);
 
+        taxPolicy = mock(TaxPolicy.class);
+        when(taxPolicy.calculateTax(ProductType.DRUG, new Money(2, Money.DEFAULT_CURRENCY))).thenReturn(
+                new Tax(new Money(2, Money.DEFAULT_CURRENCY), "tax-drugs"));
 
-    @Test public void issuance() {
-        ir.add(requestItem1);
-        System.out.println(taxPolicy);
-        System.out.println(ir.getClientData());
-        bk.issuance(ir, taxPolicy);
+        productData = mock(ProductData.class);
+        when(productData.getType()).thenReturn(ProductType.DRUG);
+
+    }
+
+    @Test public void issuanceMethodReturnsInvoiceWithOneItem() {
+        RequestItem requestItem1 = new RequestItem(productData, 1, new Money(2, Money.DEFAULT_CURRENCY));
+        invoiceRequest.add(requestItem1);
+        Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+
+        Assert.assertThat(invoice.getItems().size(), Matchers.equalTo(1));
     }
 }

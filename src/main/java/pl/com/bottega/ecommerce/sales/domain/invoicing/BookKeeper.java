@@ -28,7 +28,6 @@ public class BookKeeper {
 
 		for (RequestItem item : invoiceRequest.getItems()) {
 			Money net = item.getTotalCost();
-			System.out.println(taxPolicy);
 			Tax tax = taxPolicy.calculateTax(item.getProductData().getType(),
 					net);
 
