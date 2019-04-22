@@ -52,10 +52,18 @@ public class AddProductCommandHandlerTest {
 
         addProductCommandHandler = new AddProductCommandHandler(reservationRepository, productRepository, suggestionService, clientRepository, systemContext);
     }
+
     @Test public void productRepositoryLoadShouldBeCalledOnce() {
         command = new AddProductCommand(Id.generate(), new Id("1"), 1);
         addProductCommandHandler.handle(command);
 
         verify(productRepository, times(1)).load(any(Id.class));
+    }
+
+    @Test public void reservationRepositoryLoadShouldBeCalledOnce() {
+        command = new AddProductCommand(Id.generate(), new Id("1"), 1);
+        addProductCommandHandler.handle(command);
+
+        verify(reservationRepository, times(1)).load(any(Id.class));
     }
 }
