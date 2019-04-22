@@ -57,4 +57,12 @@ public class BookKeeperTest {
 
         verify(taxPolicy, times(2)).calculateTax(ProductType.DRUG, money);
     }
+
+    @Test public void issuanceMethodReturnsInvoiceWithValidProductType(){
+        RequestItem requestItem1 = new RequestItem(productData, 1, new Money(2, Money.DEFAULT_CURRENCY));
+        invoiceRequest.add(requestItem1);
+        Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+
+        Assert.assertThat(invoice.getItems().get(0).getProduct().getType(), Matchers.equalTo(ProductType.DRUG));
+    }
 }
