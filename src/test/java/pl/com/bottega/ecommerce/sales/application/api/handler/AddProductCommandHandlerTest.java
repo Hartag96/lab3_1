@@ -17,6 +17,7 @@ import pl.com.bottega.ecommerce.sales.domain.productscatalog.ProductRepository;
 import pl.com.bottega.ecommerce.sales.domain.reservation.Reservation;
 import pl.com.bottega.ecommerce.sales.domain.reservation.ReservationRepository;
 import pl.com.bottega.ecommerce.system.application.SystemContext;
+import pl.com.bottega.ecommerce.system.application.SystemUser;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -79,5 +80,14 @@ public class AddProductCommandHandlerTest {
         addProductCommandHandler.handle(command);
 
         verify(suggestionService, never()).suggestEquivalent(any(Product.class), any(Client.class));
+    }
+
+    @Test public void suggestionServiceSaveShouldBeCalledOnce() {
+        when(product.isAvailable()).thenReturn(false);
+        when(systemContext.getSystemUser()).thenReturn(new SystemUser(Id.generate()));
+        command = new AddProductCommand(Id.generate(), new Id("1"), 1);
+        addProductCommandHandler.handle(command);
+
+        verify(suggestionService, times(1)).suggestEquivalent(any(Product.class), any(Client.class));
     }
 }
