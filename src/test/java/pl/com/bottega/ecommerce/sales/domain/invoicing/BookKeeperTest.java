@@ -78,4 +78,10 @@ public class BookKeeperTest {
 
         verify(productData, times(2)).getType();
     }
+
+    @Test public void issuanceMethodReturnsInvoiceWithoutItems() {
+        Invoice invoice = bookKeeper.issuance(invoiceRequest, taxPolicy);
+
+        Assert.assertThat(invoice.getItems().size(), Matchers.equalTo(0));
+    }
 }
