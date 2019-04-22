@@ -67,11 +67,17 @@ public class AddProductCommandHandlerTest {
         verify(reservationRepository, times(1)).load(any(Id.class));
     }
 
-
     @Test public void reservationRepositorySaveShouldBeCalledOnce() {
         command = new AddProductCommand(Id.generate(), new Id("1"), 1);
         addProductCommandHandler.handle(command);
 
         verify(reservationRepository, times(1)).save(any(Reservation.class));
+    }
+
+    @Test public void suggestionServiceSaveShouldBeNeverCalled() {
+        command = new AddProductCommand(Id.generate(), new Id("1"), 1);
+        addProductCommandHandler.handle(command);
+
+        verify(suggestionService, never()).suggestEquivalent(any(Product.class), any(Client.class));
     }
 }
